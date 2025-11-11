@@ -19,6 +19,7 @@ if is_set := rtc.memory():
     try:
         sunrise.sunrise()
     except KeyboardInterrupt:
+        rtc.memory(b"")
         sunrise.stop()
 
 sleep_time = sunrise.next_alarm()

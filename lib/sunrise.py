@@ -2,7 +2,7 @@ import time
 import neopixel
 
 from lib.configuration import config
-from lib.time_sync import eastern_to_utc
+from lib.time_sync import utc_to_eastern
 
 COLOR = config.get("color", (220, 238, 247))
 DELAY = config.get("delay", 60)
@@ -16,7 +16,8 @@ class Sunrise:
 
     @staticmethod
     def next_alarm() -> int:
-        date_ts = time.time()
+        date_ts = utc_to_eastern(time.time())
+        tomorrow_ts = date_ts + 86400
         date_local = time.localtime(date_ts)
         week = config.get("week", {})
         hour, minute = week[date_local[6]]
@@ -24,14 +25,14 @@ class Sunrise:
             date_local[0], # year
             date_local[1], # month 1-12
             date_local[2], # day 1-31
-            hour,   # hour 0-23
+            hour,          # hour 0-23
             minute,        # minute 0-59
             0,             # second 0-59
             date_local[6], # weekday 0-6
             date_local[7], # yearday 1-366
         ))
-        if eastern_to_utc(wake_today) <= date_ts:
-            tomorrow_local = time.localtime(wake_today + 86400)
+        if wake_today <= date_ts:
+            tomorrow_local = time.localtime(tomorrow_ts)
             hour, minute = week[tomorrow_local[6]]
             wake_tomorrow = time.mktime((
                 tomorrow_local[0],
@@ -43,8 +44,8 @@ class Sunrise:
                 tomorrow_local[6],
                 tomorrow_local[7],
             ))
-            return eastern_to_utc(wake_tomorrow) - date_ts
-        return eastern_to_utc(wake_today) - date_ts
+            return wake_tomorrow - date_ts
+        return wake_today - date_ts
 
     def sunrise(self):
         """
@@ -66,7 +67,6 @@ class Sunrise:
                 time.sleep(DELAY)
             except ValueError:
                 time.sleep(1)
-                # wdt.feed()
         self.brighten()
 
     def brighten(self):
@@ -84,8 +84,7 @@ class Sunrise:
                 self.pixels.write()
                 time.sleep(DELAY)
             except OSError as e:
-                time.sleep(1)
-                # wdt.feed()
+                print(f"OSError: {e}")
         self.stop()
 
     def stop(self):
@@ -94,3 +93,4 @@ class Sunrise:
         """
         self.pixels.fill((0, 0, 0))
         self.pixels.write()
+

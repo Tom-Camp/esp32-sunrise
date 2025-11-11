@@ -45,6 +45,6 @@ def sync_and_set_rtc() -> None:
     return None
 
 
-def eastern_to_utc(local_ts: int) -> int:
+def utc_to_eastern(local_ts: int) -> int:
     offset = DST_OFFSET if is_dst(time.localtime(local_ts)) else STD_OFFSET
-    return local_ts + offset
+    return local_ts + (offset * -1)
