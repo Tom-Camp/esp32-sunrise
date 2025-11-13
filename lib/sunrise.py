@@ -58,9 +58,9 @@ class Sunrise:
         ]
         for light in light_order:
             self.pixels[light] = (
-                int(COLOR[0] * BRIGHTNESS),
-                int(COLOR[1] * BRIGHTNESS),
-                int(COLOR[2] * BRIGHTNESS),
+                round(COLOR[0] * BRIGHTNESS),
+                round(COLOR[1] * BRIGHTNESS),
+                round(COLOR[2] * BRIGHTNESS),
             )
             try:
                 self.pixels.write()
@@ -74,13 +74,13 @@ class Sunrise:
         Increase brightness
         """
         for br in range(1, 8):
-            brighter = br * 0.1
+            brighter = br * BRIGHTNESS
             try:
-                self.pixels.fill = (
-                    int(COLOR[0] * brighter),
-                    int(COLOR[1] * brighter),
-                    int(COLOR[2] * brighter),
-                )
+                self.pixels.fill((
+                    round(COLOR[0] * brighter),
+                    round(COLOR[1] * brighter),
+                    round(COLOR[2] * brighter),
+                ))
                 self.pixels.write()
                 time.sleep(DELAY)
             except OSError as e:
@@ -89,8 +89,10 @@ class Sunrise:
 
     def stop(self):
         """
-        Clear self.pixels
+        Set all to off
         """
         self.pixels.fill((0, 0, 0))
+        self.pixels.write()
+        time.sleep(0.05)
         self.pixels.write()
 
