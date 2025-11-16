@@ -2,7 +2,6 @@ import time
 import neopixel
 
 from lib.configuration import config
-from lib.time_sync import utc_to_eastern
 
 COLOR = config.get("color", (220, 238, 247))
 DELAY = config.get("delay", 60)
@@ -13,39 +12,6 @@ class Sunrise:
 
     def __init__(self, pixels: neopixel.NeoPixel):
         self.pixels = pixels
-
-    @staticmethod
-    def next_alarm() -> int:
-        date_ts = utc_to_eastern(time.time())
-        tomorrow_ts = date_ts + 86400
-        date_local = time.localtime(date_ts)
-        week = config.get("week", {})
-        hour, minute = week[date_local[6]]
-        wake_today = time.mktime((
-            date_local[0], # year
-            date_local[1], # month 1-12
-            date_local[2], # day 1-31
-            hour,          # hour 0-23
-            minute,        # minute 0-59
-            0,             # second 0-59
-            date_local[6], # weekday 0-6
-            date_local[7], # yearday 1-366
-        ))
-        if wake_today <= date_ts:
-            tomorrow_local = time.localtime(tomorrow_ts)
-            hour, minute = week[tomorrow_local[6]]
-            wake_tomorrow = time.mktime((
-                tomorrow_local[0],
-                tomorrow_local[1],
-                tomorrow_local[2],
-                hour,
-                minute,
-                0,
-                tomorrow_local[6],
-                tomorrow_local[7],
-            ))
-            return wake_tomorrow - date_ts
-        return wake_today - date_ts
 
     def sunrise(self):
         """
